@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Expense Tracker</title>
+    <!-- Outfit Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h2>AuditFlow</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="transactions">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Transactions</span>
+                </button>
+                <button class="nav-item" data-tab="budgets">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Budgets</span>
+                </button>
+                <button class="nav-item" data-tab="reports">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Reports</span>
+                </button>
+                <button class="nav-item" data-tab="settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="theme-toggle-btn">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>Dark Mode</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <header class="content-header">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p class="subtitle">Welcome back! Here's your financial summary.</p>
+                    </div>
+                    <button class="btn btn-primary btn-add-transaction">
+                        <i class="fa-solid fa-plus"></i> Add Transaction
+                    </button>
+                </header>
+
+                <!-- Summary Cards Grid -->
+                <div class="summary-cards">
+                    <div class="card summary-card balance-card">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-label">Total Balance</span>
+                            <h2 id="total-balance" class="card-value">₹0.00</h2>
+                        </div>
+                    </div>
+                    <div class="card summary-card income-card">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-label">Total Income</span>
+                            <h2 id="total-income" class="card-value income">₹0.00</h2>
+                        </div>
+                    </div>
+                    <div class="card summary-card expense-card">
+                        <div class="card-icon">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                        <div class="card-info">
+                            <span class="card-label">Total Expenses</span>
+                            <h2 id="total-expense" class="card-value expense">₹0.00</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Details Grid -->
+                <div class="dashboard-grid">
+                    <!-- Chart Section -->
+                    <div class="card chart-container-card">
+                        <div class="card-header">
+                            <h3>Monthly Category Breakdown</h3>
+                        </div>
+                        <div class="card-body chart-wrapper">
+                            <div class="chart-aspect-ratio">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                            <div id="no-chart-data" class="no-data-placeholder hidden">
+                                <i class="fa-solid fa-chart-bar"></i>
+                                <p>No expense data available for this month.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions Section -->
+                    <div class="card recent-tx-card">
+                        <div class="card-header">
+                            <h3>Recent Transactions</h3>
+                            <button class="btn btn-text btn-view-all">View All</button>
+                        </div>
+                        <div class="card-body">
+                            <ul id="recent-transactions-list" class="recent-list">
+                                <!-- Loaded dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Tab -->
+            <section id="transactions" class="tab-content">
+                <header class="content-header">
+                    <div>
+                        <h1>Transactions</h1>
+                        <p class="subtitle">Manage and filter your income and expenses.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="btn-import-csv">
+                            <i class="fa-solid fa-file-import"></i> Import CSV
+                        </button>
+                        <button class="btn btn-secondary" id="btn-export-csv">
+                            <i class="fa-solid fa-file-export"></i> Export CSV
+                        </button>
+                        <button class="btn btn-primary btn-add-transaction">
+                            <i class="fa-solid fa-plus"></i> Add Transaction
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Filter Controls Panel -->
+                <div class="card filter-card">
+                    <div class="filter-grid">
+                        <div class="filter-group search-group">
+                            <label for="search-input">Search Notes/Category</label>
+                            <div class="input-icon-wrapper">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="search-input" placeholder="Search...">
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-type">Type</label>
+                            <select id="filter-type">
+                                <option value="">All Types</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-category">Category</label>
+                            <select id="filter-category">
+                                <option value="">All Categories</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="filter-group date-group">
+                            <label for="filter-start-date">Date Range</label>
+                            <div class="date-inputs">
+                                <input type="date" id="filter-start-date">
+                                <span>to</span>
+                                <input type="date" id="filter-end-date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-actions-row">
+                        <button class="btn btn-secondary btn-sm" id="btn-reset-filters">
+                            <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Transactions Table Container -->
+                <div class="card table-card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Type</th>
+                                    <th>Description / Notes</th>
+                                    <th class="text-right">Amount</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-table-body">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-transactions-placeholder" class="no-data-placeholder hidden">
+                        <i class="fa-solid fa-receipt"></i>
+                        <p>No transactions found matching the filters.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Budgets Tab -->
+            <section id="budgets" class="tab-content">
+                <header class="content-header">
+                    <div>
+                        <h1>Monthly Budgets</h1>
+                        <p class="subtitle">Set targets for categories to keep spending under control.</p>
+                    </div>
+                    <button class="btn btn-primary" id="btn-add-budget">
+                        <i class="fa-solid fa-sliders"></i> Set Custom Budget
+                    </button>
+                </header>
+
+                <!-- Budget Cards Grid -->
+                <div id="budgets-grid" class="budgets-grid">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- Reports Tab -->
+            <section id="reports" class="tab-content">
+                <header class="content-header">
+                    <div>
+                        <h1>Reports & Insights</h1>
+                        <p class="subtitle">Analyze your cash flow and financial patterns.</p>
+                    </div>
+                </header>
+
+                <div class="reports-grid">
+                    <div class="card reports-chart-card">
+                        <div class="card-header">
+                            <h3>Category Comparison</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-aspect-ratio-reports">
+                                <canvas id="reportsCategoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card reports-summary-card">
+                        <div class="card-header">
+                            <h3>Spending Analysis</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="analysis-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Most Expense Category</span>
+                                    <span id="highest-spending-category" class="stat-val">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Avg. Monthly Expense</span>
+                                    <span id="avg-expense-value" class="stat-val">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Savings Rate</span>
+                                    <span id="savings-rate-value" class="stat-val">-</span>
+                                </div>
+                            </div>
+                            <div class="budget-compliance-wrapper">
+                                <h4>Budget Compliance</h4>
+                                <div id="budget-compliance-status">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section id="settings" class="tab-content">
+                <header class="content-header">
+                    <div>
+                        <h1>Settings</h1>
+                        <p class="subtitle">Configure database options and test parameters.</p>
+                    </div>
+                </header>
+
+                <div class="settings-grid">
+                    <div class="card settings-card">
+                        <div class="card-header">
+                            <h3>Database Operations</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="settings-action-item">
+                                <div class="action-desc">
+                                    <h4>Reset Database</h4>
+                                    <p class="text-danger">Delete all transactions and budget settings. This action is permanent and cannot be undone.</p>
+                                </div>
+                                <button class="btn btn-danger" id="btn-reset-db">
+                                    <i class="fa-solid fa-trash-can"></i> Clear Database
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card settings-card">
+                        <div class="card-header">
+                            <h3>Application Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="info-table">
+                                <tr>
+                                    <td>Frontend Tech</td>
+                                    <td>HTML5, Vanilla CSS3, Javascript (ES6)</td>
+                                </tr>
+                                <tr>
+                                    <td>Backend Tech</td>
+                                    <td>Python 3, SQLite Database, PyWebView</td>
+                                </tr>
+                                <tr>
+                                    <td>Visualizations</td>
+                                    <td>Chart.js Integration</td>
+                                </tr>
+                                <tr>
+                                    <td>Version</td>
+                                    <td>1.0.0 (Mini Project)</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Add/Edit Transaction Modal -->
+    <div id="transaction-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Transaction</h3>
+                <button class="btn-close-modal" id="btn-close-tx-modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="transaction-form" class="modal-form">
+                <input type="hidden" id="tx-id">
+                
+                <div class="form-row type-selector">
+                    <label class="type-btn active" id="type-btn-expense">
+                        <input type="radio" name="tx-type" value="expense" checked required>
+                        <i class="fa-solid fa-arrow-trend-down"></i> Expense
+                    </label>
+                    <label class="type-btn" id="type-btn-income">
+                        <input type="radio" name="tx-type" value="income" required>
+                        <i class="fa-solid fa-arrow-trend-up"></i> Income
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-amount">Amount (₹) *</label>
+                    <input type="number" id="tx-amount" step="0.01" min="0.01" placeholder="0.00" required>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label for="tx-category">Category *</label>
+                        <select id="tx-category" required>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tx-date">Date *</label>
+                        <input type="date" id="tx-date" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="tx-notes">Description / Notes</label>
+                    <input type="text" id="tx-notes" placeholder="e.g. Weekly groceries, client paycheck...">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-tx-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-tx">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Set Custom Budget Modal -->
+    <div id="budget-modal" class="modal-overlay">
+        <div class="modal-card modal-sm">
+            <div class="modal-header">
+                <h3>Set Category Budget</h3>
+                <button class="btn-close-modal" id="btn-close-budget-modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="budget-form" class="modal-form">
+                <div class="form-group">
+                    <label for="budget-category">Category</label>
+                    <select id="budget-category" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="budget-amount">Monthly Limit (₹)</label>
+                    <input type="number" id="budget-amount" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-budget-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Budget</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Custom JavaScript Controller -->
+    <script src="js/main.js"></script>
+</body>
+</html>
