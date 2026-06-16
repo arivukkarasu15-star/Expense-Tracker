@@ -1,8 +1,8 @@
 import os
 import sys
 import webview
+from pathlib import Path
 
-# Add project root directory to python path to resolve modules correctly
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -11,41 +11,36 @@ from backend import database
 from backend.tracker import ExpenseTrackerAPI
 
 def main():
-    # Disable automatic DevTools opening in debug mode (prevents external window)
-    webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
-
-    # Initialize SQLite database and tables
-    print("[INFO] Initializing SQLite database...")
     database.init_db()
 
-    # Create the API instance
     api = ExpenseTrackerAPI()
 
-    # Determine HTML entry point
     html_path = os.path.join(project_root, "frontend", "index.html")
     if not os.path.exists(html_path):
-        print(f"[ERROR] Frontend HTML file not found at: {html_path}")
+        print(f"frontend not found: {html_path}")
         sys.exit(1)
 
-    print(f"[INFO] Launching UI window loading: {html_path}")
+    file_url = Path(html_path).as_uri()
 
-    # Create native window
     window = webview.create_window(
         title="Smart Expense Tracker",
-        url=html_path,
+        url=file_url,
         js_api=api,
         width=1200,
         height=800,
         min_size=(950, 650),
-        background_color="#12131C"  # Dark background to match theme before render
+        background_color="#12131C"
     )
 
-    # Link window to API for dialogues
     api.set_window(window)
 
-    # Start PyWebView loop in debug mode to avoid WebView2 threading bugs on Windows,
-    # but with DevTools automatic popup disabled via settings above.
-    webview.start(debug=True)
+    def on_loaded():
+        # trigger JS refresh after page fully loads
+        window.evaluate_js("setTimeout(() => { if(typeof refreshData === 'function') refreshData(); }, 300);")
+
+    window.events.loaded += on_loaded
+
+    webview.start()
 
 if __name__ == "__main__":
     main()

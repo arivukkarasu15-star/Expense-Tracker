@@ -4,19 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Expense Tracker</title>
-    <!-- Outfit Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-theme">
     <div class="app-container">
-        
-        <!-- Sidebar Navigation -->
+
         <aside class="sidebar">
             <div class="sidebar-brand">
                 <div class="brand-icon">
@@ -24,7 +19,7 @@
                 </div>
                 <h2>AuditFlow</h2>
             </div>
-            
+
             <nav class="sidebar-nav">
                 <button class="nav-item active" data-tab="dashboard">
                     <i class="fa-solid fa-chart-pie"></i>
@@ -34,10 +29,7 @@
                     <i class="fa-solid fa-list-check"></i>
                     <span>Transactions</span>
                 </button>
-                <button class="nav-item" data-tab="budgets">
-                    <i class="fa-solid fa-sliders"></i>
-                    <span>Budgets</span>
-                </button>
+                
                 <button class="nav-item" data-tab="reports">
                     <i class="fa-solid fa-chart-line"></i>
                     <span>Reports</span>
@@ -56,10 +48,8 @@
             </div>
         </aside>
 
-        <!-- Main Content Area -->
         <main class="main-content">
-            
-            <!-- Dashboard Tab -->
+
             <section id="dashboard" class="tab-content active">
                 <header class="content-header">
                     <div>
@@ -71,7 +61,6 @@
                     </button>
                 </header>
 
-                <!-- Summary Cards Grid -->
                 <div class="summary-cards">
                     <div class="card summary-card balance-card">
                         <div class="card-icon">
@@ -102,9 +91,7 @@
                     </div>
                 </div>
 
-                <!-- Dashboard Details Grid -->
                 <div class="dashboard-grid">
-                    <!-- Chart Section -->
                     <div class="card chart-container-card">
                         <div class="card-header">
                             <h3>Monthly Category Breakdown</h3>
@@ -120,22 +107,18 @@
                         </div>
                     </div>
 
-                    <!-- Recent Transactions Section -->
                     <div class="card recent-tx-card">
                         <div class="card-header">
                             <h3>Recent Transactions</h3>
                             <button class="btn btn-text btn-view-all">View All</button>
                         </div>
                         <div class="card-body">
-                            <ul id="recent-transactions-list" class="recent-list">
-                                <!-- Loaded dynamically -->
-                            </ul>
+                            <ul id="recent-transactions-list" class="recent-list"></ul>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Transactions Tab -->
             <section id="transactions" class="tab-content">
                 <header class="content-header">
                     <div>
@@ -155,7 +138,6 @@
                     </div>
                 </header>
 
-                <!-- Filter Controls Panel -->
                 <div class="card filter-card">
                     <div class="filter-grid">
                         <div class="filter-group search-group">
@@ -177,7 +159,6 @@
                             <label for="filter-category">Category</label>
                             <select id="filter-category">
                                 <option value="">All Categories</option>
-                                <!-- Populated dynamically -->
                             </select>
                         </div>
                         <div class="filter-group date-group">
@@ -196,7 +177,6 @@
                     </div>
                 </div>
 
-                <!-- Transactions Table Container -->
                 <div class="card table-card">
                     <div class="table-responsive">
                         <table>
@@ -210,9 +190,7 @@
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="transactions-table-body">
-                                <!-- Loaded dynamically -->
-                            </tbody>
+                            <tbody id="transactions-table-body"></tbody>
                         </table>
                     </div>
                     <div id="no-transactions-placeholder" class="no-data-placeholder hidden">
@@ -222,25 +200,6 @@
                 </div>
             </section>
 
-            <!-- Budgets Tab -->
-            <section id="budgets" class="tab-content">
-                <header class="content-header">
-                    <div>
-                        <h1>Monthly Budgets</h1>
-                        <p class="subtitle">Set targets for categories to keep spending under control.</p>
-                    </div>
-                    <button class="btn btn-primary" id="btn-add-budget">
-                        <i class="fa-solid fa-sliders"></i> Set Custom Budget
-                    </button>
-                </header>
-
-                <!-- Budget Cards Grid -->
-                <div id="budgets-grid" class="budgets-grid">
-                    <!-- Populated dynamically -->
-                </div>
-            </section>
-
-            <!-- Reports Tab -->
             <section id="reports" class="tab-content">
                 <header class="content-header">
                     <div>
@@ -281,16 +240,13 @@
                             </div>
                             <div class="budget-compliance-wrapper">
                                 <h4>Budget Compliance</h4>
-                                <div id="budget-compliance-status">
-                                    <!-- Populated dynamically -->
-                                </div>
+                                <div id="budget-compliance-status"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Settings Tab -->
             <section id="settings" class="tab-content">
                 <header class="content-header">
                     <div>
@@ -348,9 +304,6 @@
         </main>
     </div>
 
-    <!-- Modals -->
-
-    <!-- Add/Edit Transaction Modal -->
     <div id="transaction-modal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-header">
@@ -361,7 +314,6 @@
             </div>
             <form id="transaction-form" class="modal-form">
                 <input type="hidden" id="tx-id">
-                
                 <div class="form-row type-selector">
                     <label class="type-btn active" id="type-btn-expense">
                         <input type="radio" name="tx-type" value="expense" checked required>
@@ -372,30 +324,24 @@
                         <i class="fa-solid fa-arrow-trend-up"></i> Income
                     </label>
                 </div>
-
                 <div class="form-group">
                     <label for="tx-amount">Amount (₹) *</label>
                     <input type="number" id="tx-amount" step="0.01" min="0.01" placeholder="0.00" required>
                 </div>
-
                 <div class="form-row-2">
                     <div class="form-group">
                         <label for="tx-category">Category *</label>
-                        <select id="tx-category" required>
-                            <!-- Populated dynamically -->
-                        </select>
+                        <select id="tx-category" required></select>
                     </div>
                     <div class="form-group">
                         <label for="tx-date">Date *</label>
                         <input type="date" id="tx-date" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label for="tx-notes">Description / Notes</label>
                     <input type="text" id="tx-notes" placeholder="e.g. Weekly groceries, client paycheck...">
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="btn-cancel-tx-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary" id="btn-submit-tx">Save Transaction</button>
@@ -404,38 +350,8 @@
         </div>
     </div>
 
-    <!-- Set Custom Budget Modal -->
-    <div id="budget-modal" class="modal-overlay">
-        <div class="modal-card modal-sm">
-            <div class="modal-header">
-                <h3>Set Category Budget</h3>
-                <button class="btn-close-modal" id="btn-close-budget-modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form id="budget-form" class="modal-form">
-                <div class="form-group">
-                    <label for="budget-category">Category</label>
-                    <select id="budget-category" required>
-                        <!-- Populated dynamically -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="budget-amount">Monthly Limit (₹)</label>
-                    <input type="number" id="budget-amount" step="0.01" min="0" placeholder="0.00" required>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btn-cancel-budget-modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Budget</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>
 
-    <!-- Custom JavaScript Controller -->
-    <script src="js/main.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>

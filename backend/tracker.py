@@ -12,15 +12,13 @@ class ExpenseTrackerAPI:
 
     def get_dashboard_summary(self):
         try:
-            summary = database.get_dashboard_summary()
-            return {"success": True, "data": summary}
+            return {"success": True, "data": database.get_dashboard_summary()}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
     def get_transactions(self, filters=None):
         try:
-            txs = database.get_transactions(filters)
-            return {"success": True, "data": txs}
+            return {"success": True, "data": database.get_transactions(filters)}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
@@ -34,7 +32,6 @@ class ExpenseTrackerAPI:
                     return {"success": False, "message": "Amount must be greater than zero."}
             except ValueError:
                 return {"success": False, "message": "Amount must be a valid number."}
-            
             if not category:
                 return {"success": False, "message": "Category is required."}
             if not date:
@@ -51,7 +48,6 @@ class ExpenseTrackerAPI:
                 t_id = int(t_id)
             except ValueError:
                 return {"success": False, "message": "Invalid transaction ID."}
-
             if not t_type or t_type not in ['income', 'expense']:
                 return {"success": False, "message": "Invalid transaction type."}
             try:
@@ -60,7 +56,6 @@ class ExpenseTrackerAPI:
                     return {"success": False, "message": "Amount must be greater than zero."}
             except ValueError:
                 return {"success": False, "message": "Amount must be a valid number."}
-            
             if not category:
                 return {"success": False, "message": "Category is required."}
             if not date:
@@ -69,8 +64,7 @@ class ExpenseTrackerAPI:
             updated = database.update_transaction(t_id, t_type, amount, category, date, notes)
             if updated:
                 return {"success": True, "message": "Transaction updated successfully."}
-            else:
-                return {"success": False, "message": "Transaction not found or no changes made."}
+            return {"success": False, "message": "Transaction not found or no changes made."}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
@@ -80,19 +74,16 @@ class ExpenseTrackerAPI:
                 t_id = int(t_id)
             except ValueError:
                 return {"success": False, "message": "Invalid transaction ID."}
-
             deleted = database.delete_transaction(t_id)
             if deleted:
                 return {"success": True, "message": "Transaction deleted successfully."}
-            else:
-                return {"success": False, "message": "Transaction not found."}
+            return {"success": False, "message": "Transaction not found."}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
     def get_budgets(self):
         try:
-            budgets = database.get_budgets()
-            return {"success": True, "data": budgets}
+            return {"success": True, "data": database.get_budgets()}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
@@ -106,7 +97,6 @@ class ExpenseTrackerAPI:
                     return {"success": False, "message": "Budget limit cannot be negative."}
             except ValueError:
                 return {"success": False, "message": "Budget limit must be a valid number."}
-
             database.set_budget(category, amount)
             return {"success": True, "message": f"Budget for {category} set to {amount}."}
         except Exception as e:
@@ -117,8 +107,7 @@ class ExpenseTrackerAPI:
             deleted = database.delete_budget(category)
             if deleted:
                 return {"success": True, "message": f"Budget for {category} deleted."}
-            else:
-                return {"success": False, "message": "Budget category not found."}
+            return {"success": False, "message": "Budget category not found."}
         except Exception as e:
             return {"success": False, "message": str(e)}
 
@@ -132,79 +121,70 @@ class ExpenseTrackerAPI:
     def export_csv(self):
         try:
             if not self.window:
-                return {"success": False, "message": "Native window context not loaded."}
-            
+                return {"success": False, "message": "Window not available."}
+
             file_path = self.window.create_file_dialog(
-                webview.SAVE_FILE_DIALOG,
+                webview.SAVE_DIALOG,
                 save_filename="expenses_export.csv",
                 file_types=("CSV Files (*.csv)", "All Files (*.*)")
             )
-            
+
             if not file_path:
                 return {"success": True, "cancelled": True, "message": "Export cancelled."}
-            
             if isinstance(file_path, (tuple, list)):
-                if len(file_path) > 0:
-                    file_path = file_path[0]
-                else:
+                if not file_path:
                     return {"success": True, "cancelled": True, "message": "Export cancelled."}
-            
+                file_path = file_path[0]
+
             txs = database.get_transactions()
             with open(file_path, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(['ID', 'Type', 'Amount', 'Category', 'Date', 'Notes'])
                 for tx in txs:
                     writer.writerow([tx['id'], tx['type'], tx['amount'], tx['category'], tx['date'], tx['notes']])
-            
-            return {"success": True, "message": f"Exported successfully to {os.path.basename(file_path)}"}
+
+            return {"success": True, "message": f"Exported to {os.path.basename(file_path)}"}
         except Exception as e:
             return {"success": False, "message": f"Export failed: {str(e)}"}
 
     def import_csv(self):
         try:
             if not self.window:
-                return {"success": False, "message": "Native window context not loaded."}
-                
+                return {"success": False, "message": "Window not available."}
+
             file_path = self.window.create_file_dialog(
-                webview.OPEN_FILE_DIALOG,
+                webview.OPEN_DIALOG,
                 file_types=("CSV Files (*.csv)", "All Files (*.*)")
             )
-            
+
             if not file_path:
                 return {"success": True, "cancelled": True, "message": "Import cancelled."}
-                
             if isinstance(file_path, (tuple, list)):
-                if len(file_path) > 0:
-                    file_path = file_path[0]
-                else:
+                if not file_path:
                     return {"success": True, "cancelled": True, "message": "Import cancelled."}
-                    
+                file_path = file_path[0]
+
             imported_count = 0
             with open(file_path, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
-                
-                # Check headers case-insensitively
+
                 if not reader.fieldnames:
-                    return {"success": False, "message": "Empty CSV file or missing headers."}
-                
+                    return {"success": False, "message": "Empty CSV or missing headers."}
+
                 headers = [h.strip().lower() for h in reader.fieldnames]
                 required = ['type', 'amount', 'category', 'date']
-                
-                if not all(req in headers for req in required):
-                    return {
-                        "success": False, 
-                        "message": f"CSV structure invalid. Must contain headers: {', '.join(required)}"
-                    }
-                
+                if not all(r in headers for r in required):
+                    return {"success": False, "message": f"CSV must have headers: {', '.join(required)}"}
+
                 header_map = {h.strip().lower(): h for h in reader.fieldnames}
-                
+
                 for row in reader:
                     t_type = row[header_map['type']].strip().lower()
                     amount_str = row[header_map['amount']].strip()
                     category = row[header_map['category']].strip()
                     date = row[header_map['date']].strip()
                     notes = row[header_map.get('notes', '')].strip() if 'notes' in header_map else ''
-                    
+
                     if t_type not in ['income', 'expense']:
                         continue
                     try:
@@ -213,14 +193,10 @@ class ExpenseTrackerAPI:
                             continue
                     except ValueError:
                         continue
-                        
+
                     database.add_transaction(t_type, amount, category, date, notes)
                     imported_count += 1
-            
-            return {
-                "success": True, 
-                "message": f"Successfully imported {imported_count} transactions!",
-                "count": imported_count
-            }
+
+            return {"success": True, "message": f"Imported {imported_count} transactions.", "count": imported_count}
         except Exception as e:
             return {"success": False, "message": f"Import failed: {str(e)}"}

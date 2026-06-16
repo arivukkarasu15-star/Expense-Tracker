@@ -1,7 +1,3 @@
-/* ==========================================================================
-   SMART EXPENSE TRACKER - MODERN CSS DESIGN SYSTEM (SLATE & VIOLET)
-   ========================================================================== */
-
 /* Theme Variables */
 :root {
     /* Dark Theme (Default) */
@@ -391,10 +387,12 @@ body.light-theme .nav-item.active {
 
 .chart-wrapper {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 250px;
     position: relative;
+    width: 100%;
 }
 
 .chart-aspect-ratio {
