@@ -79,6 +79,19 @@ input, select, textarea {
     border: none;
 }
 
+/* Hide number input spinner up/down arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    margin: 0 !important;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+}
+
 select {
     appearance: none;
     -webkit-appearance: none;
@@ -449,6 +462,7 @@ a {
     color: var(--text-primary);
     letter-spacing: -0.5px;
     line-height: 1.1;
+    transition: color 0.15s ease;
 }
 
 .center-label {
@@ -458,6 +472,7 @@ a {
     text-transform: uppercase;
     letter-spacing: 0.8px;
     margin-top: 4px;
+    transition: color 0.15s ease;
 }
 
 /* Recent Transaction List */
@@ -517,33 +532,76 @@ a {
     color: var(--text-primary);
 }
 
-/* Placeholders for blank states */
+/* Placeholders for blank / empty states */
 .no-data-placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    color: var(--text-muted);
     text-align: center;
-    padding: 40px 0;
+    gap: 12px;
+    padding: 36px 20px;
     width: 100%;
-}
-
-.no-data-placeholder i {
-    font-size: 2.2rem;
+    height: 100%;
+    min-height: 240px;
+    flex-grow: 1;
 }
 
 .no-data-placeholder.hidden {
-    display: none;
+    display: none !important;
+}
+
+.empty-icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0.04) 100%);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    box-shadow: 0 0 24px rgba(99, 102, 241, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+}
+
+.no-data-placeholder h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.no-data-placeholder p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    max-width: 320px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.empty-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.recent-tx-card-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
 }
 
 /* ==========================================================================
    TRANSACTIONS TAB - FILTERS & TABLES
    ========================================================================== */
 .filter-card {
-    margin-bottom: 28px;
-    padding: 24px;
+    margin-bottom: 20px;
+    padding: 20px 24px;
 }
 
 .filter-grid {
@@ -628,19 +686,27 @@ a {
 .filter-actions-row {
     display: flex;
     justify-content: flex-end;
-    margin-top: 14px;
+    margin-top: 12px;
 }
 
 /* Table Design */
 .table-card {
-    padding: 12px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    margin-bottom: 24px;
     overflow: hidden;
 }
 
 .table-responsive {
     overflow-x: auto;
-    max-height: calc(100vh - 330px);
-    min-height: 420px;
+    overflow-y: auto;
+    flex-grow: 1;
+    max-height: calc(100vh - 380px);
+    min-height: 250px;
+    padding-bottom: 16px;
 }
 
 table {
@@ -651,7 +717,7 @@ table {
 }
 
 th {
-    padding: 18px 24px;
+    padding: 16px 24px;
     color: var(--text-secondary);
     font-weight: 600;
     font-size: 0.85rem;
@@ -665,13 +731,14 @@ th {
 }
 
 td {
-    padding: 18px 24px;
+    padding: 15px 24px;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-primary);
 }
 
 tr:last-child td {
     border-bottom: none;
+    padding-bottom: 20px;
 }
 
 tr:hover td {

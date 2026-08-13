@@ -87,16 +87,22 @@
                             <h3>Monthly Category Breakdown</h3>
                         </div>
                         <div class="card-body chart-wrapper">
-                            <div class="chart-aspect-ratio">
+                            <div class="chart-aspect-ratio" id="chart-aspect-ratio">
                                 <canvas id="categoryChart"></canvas>
                                 <div class="chart-center-text" id="chart-center-text">
                                     <span class="center-value" id="center-total-value">₹0.00</span>
-                                    <span class="center-label">Total Spent</span>
+                                    <span class="center-label" id="center-total-label">Total Spent</span>
                                 </div>
                             </div>
                             <div id="no-chart-data" class="no-data-placeholder hidden">
-                                <i class="fa-solid fa-chart-bar"></i>
-                                <p>No expense data available for this month.</p>
+                                <div class="empty-icon-circle">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                </div>
+                                <h4>No Expenses Recorded</h4>
+                                <p>Add your first expense transaction to view the monthly category breakdown.</p>
+                                <button class="btn btn-primary btn-sm btn-add-transaction">
+                                    <i class="fa-solid fa-plus"></i> Add Expense
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -106,7 +112,7 @@
                             <h3>Recent Transactions</h3>
                             <button class="btn btn-text btn-view-all">View All</button>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body recent-tx-card-body">
                             <ul id="recent-transactions-list" class="recent-list"></ul>
                         </div>
                     </div>
@@ -134,7 +140,7 @@
 
                 <div class="card filter-card">
                     <div class="filter-grid">
-                        <div class="filter-group search-group">
+                        <div class="filter-group">
                             <label for="search-input">Search Notes/Category</label>
                             <div class="input-icon-wrapper">
                                 <i class="fa-solid fa-magnifying-glass"></i>
@@ -172,7 +178,7 @@
                 </div>
 
                 <div class="card table-card">
-                    <div class="table-responsive">
+                    <div class="table-responsive" id="transactions-table-wrapper">
                         <table>
                             <thead>
                                 <tr>
@@ -188,8 +194,19 @@
                         </table>
                     </div>
                     <div id="no-transactions-placeholder" class="no-data-placeholder hidden">
-                        <i class="fa-solid fa-receipt"></i>
-                        <p>No transactions found matching the filters.</p>
+                        <div class="empty-icon-circle">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <h4>No Transactions Found</h4>
+                        <p>No transactions recorded yet or matching your active filter criteria.</p>
+                        <div class="empty-actions">
+                            <button class="btn btn-primary btn-sm btn-add-transaction">
+                                <i class="fa-solid fa-plus"></i> Add Transaction
+                            </button>
+                            <button class="btn btn-secondary btn-sm" id="btn-empty-reset">
+                                <i class="fa-solid fa-arrow-rotate-left"></i> Reset Filters
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -208,8 +225,18 @@
                             <h3>Category Comparison</h3>
                         </div>
                         <div class="card-body">
-                            <div class="chart-aspect-ratio-reports">
+                            <div class="chart-aspect-ratio-reports" id="reports-chart-wrapper">
                                 <canvas id="reportsCategoryChart"></canvas>
+                            </div>
+                            <div id="no-reports-data" class="no-data-placeholder hidden">
+                                <div class="empty-icon-circle">
+                                    <i class="fa-solid fa-chart-column"></i>
+                                </div>
+                                <h4>No Category Data Available</h4>
+                                <p>Record expense transactions or set category budgets to see visual comparisons.</p>
+                                <button class="btn btn-primary btn-sm btn-add-transaction">
+                                    <i class="fa-solid fa-plus"></i> Add Transaction
+                                </button>
                             </div>
                         </div>
                     </div>

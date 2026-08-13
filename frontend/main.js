@@ -327,7 +327,17 @@ async function renderDashboard(data) {
             const recents = txsRes.data.slice(0, 5);
 
             if (recents.length === 0) {
-                listContainer.innerHTML = `<div class="no-data-placeholder"><i class="fa-solid fa-receipt"></i><p>No transactions recorded yet.</p></div>`;
+                listContainer.innerHTML = `
+                    <div class="no-data-placeholder">
+                        <div class="empty-icon-circle">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h4>No Recent Activity</h4>
+                        <p>Your latest transactions will automatically show up here.</p>
+                        <button class="btn btn-secondary btn-sm btn-add-transaction">
+                            <i class="fa-solid fa-plus"></i> Record Transaction
+                        </button>
+                    </div>`;
             } else {
                 recents.forEach(tx => {
                     const li = document.createElement('li');
@@ -354,16 +364,40 @@ async function renderDashboard(data) {
     const hasData = totals.length > 0;
     const canvas = document.getElementById('categoryChart');
     const placeholder = document.getElementById('no-chart-data');
+    const chartWrapper = document.getElementById('chart-aspect-ratio');
 
     const centerTotalElem = document.getElementById('center-total-value');
+    const centerLabelElem = document.getElementById('center-total-label');
+    const defaultTotalText = formatCurrency(data.total_expense);
+    const defaultLabelText = 'Total Spent';
+
     if (centerTotalElem) {
-        centerTotalElem.textContent = formatCurrency(data.total_expense);
+        centerTotalElem.textContent = defaultTotalText;
+        centerTotalElem.style.color = 'var(--text-primary)';
+    }
+    if (centerLabelElem) {
+        centerLabelElem.textContent = defaultLabelText;
+        centerLabelElem.style.color = 'var(--text-secondary)';
     }
 
     if (hasData) {
+        if (chartWrapper) chartWrapper.style.display = 'flex';
         canvas.style.display = 'block';
         placeholder.classList.add('hidden');
         const labelColor = '#94a3b8';
+
+        const chartColors = [
+            '#6366f1',
+            '#10b981',
+            '#f59e0b',
+            '#ec4899',
+            '#3b82f6',
+            '#8b5cf6',
+            '#06b6d4',
+            '#f97316'
+        ];
+
+        const totalExpenseSum = totals.reduce((sum, val) => sum + val, 0);
 
         if (categoryChartInstance) categoryChartInstance.destroy();
 
@@ -373,26 +407,42 @@ async function renderDashboard(data) {
                 labels: categories,
                 datasets: [{
                     data: totals,
-                    backgroundColor: [
-                        '#6366f1',
-                        '#10b981',
-                        '#f59e0b',
-                        '#ec4899',
-                        '#3b82f6',
-                        '#8b5cf6',
-                        '#06b6d4',
-                        '#f97316'
-                    ],
+                    backgroundColor: chartColors,
                     borderWidth: 4,
                     borderColor: '#181a29',
                     hoverBorderColor: '#181a29',
-                    hoverOffset: 10,
+                    hoverOffset: 12,
                     borderRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                onHover: (event, activeElements) => {
+                    if (activeElements && activeElements.length > 0) {
+                        const idx = activeElements[0].index;
+                        const cat = categories[idx];
+                        const val = totals[idx];
+                        const pct = totalExpenseSum > 0 ? ((val / totalExpenseSum) * 100).toFixed(1) : 0;
+                        if (centerTotalElem) {
+                            centerTotalElem.textContent = formatCurrency(val);
+                            centerTotalElem.style.color = chartColors[idx % chartColors.length];
+                        }
+                        if (centerLabelElem) {
+                            centerLabelElem.textContent = `${cat} (${pct}%)`;
+                            centerLabelElem.style.color = '#ffffff';
+                        }
+                    } else {
+                        if (centerTotalElem) {
+                            centerTotalElem.textContent = defaultTotalText;
+                            centerTotalElem.style.color = 'var(--text-primary)';
+                        }
+                        if (centerLabelElem) {
+                            centerLabelElem.textContent = defaultLabelText;
+                            centerLabelElem.style.color = 'var(--text-secondary)';
+                        }
+                    }
+                },
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -406,21 +456,25 @@ async function renderDashboard(data) {
                         }
                     },
                     tooltip: {
-                        backgroundColor: '#1e2030',
-                        titleColor: '#f8fafc',
-                        bodyColor: '#cbd5e1',
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
-                        borderWidth: 1,
-                        padding: 12,
-                        boxPadding: 6,
-                        usePointStyle: true,
-                        callbacks: { label: ctx => ` ${ctx.label}: ${formatCurrency(ctx.raw)}` }
+                        enabled: false
                     }
                 },
                 cutout: '70%'
             }
         });
+
+        canvas.onmouseleave = () => {
+            if (centerTotalElem) {
+                centerTotalElem.textContent = defaultTotalText;
+                centerTotalElem.style.color = 'var(--text-primary)';
+            }
+            if (centerLabelElem) {
+                centerLabelElem.textContent = defaultLabelText;
+                centerLabelElem.style.color = 'var(--text-secondary)';
+            }
+        };
     } else {
+        if (chartWrapper) chartWrapper.style.display = 'none';
         canvas.style.display = 'none';
         placeholder.classList.remove('hidden');
         if (categoryChartInstance) { categoryChartInstance.destroy(); categoryChartInstance = null; }
@@ -442,10 +496,13 @@ async function loadTransactionsTable() {
             const tbody = elements.transactionsTableBody;
             tbody.innerHTML = '';
             const list = res.data;
+            const tableWrapper = document.getElementById('transactions-table-wrapper');
 
             if (list.length === 0) {
+                if (tableWrapper) tableWrapper.style.display = 'none';
                 elements.noTransactionsPlaceholder.classList.remove('hidden');
             } else {
+                if (tableWrapper) tableWrapper.style.display = 'block';
                 elements.noTransactionsPlaceholder.classList.add('hidden');
                 list.forEach(tx => {
                     const tr = document.createElement('tr');
@@ -594,65 +651,78 @@ function renderReports(data) {
         budgetLimits.push(data.budgets[cat] || 0.0);
     });
 
-    if (reportsChartInstance) reportsChartInstance.destroy();
+    const reportsChartWrapper = document.getElementById('reports-chart-wrapper');
+    const noReportsData = document.getElementById('no-reports-data');
+    const hasReportData = totals.some(t => t > 0) || budgetLimits.some(b => b > 0);
 
-    reportsChartInstance = new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: categories,
-            datasets: [
-                {
-                    label: 'Actual Spending (₹)',
-                    data: totals,
-                    backgroundColor: 'rgba(99, 102, 241, 0.85)',
-                    borderColor: '#6366f1',
-                    borderWidth: 1,
-                    borderRadius: 8,
-                    maxBarThickness: 32
-                },
-                {
-                    label: 'Budget Limit (₹)',
-                    data: budgetLimits,
-                    backgroundColor: 'rgba(244, 63, 94, 0.25)',
-                    borderColor: 'rgba(244, 63, 94, 0.8)',
-                    borderWidth: 1.5,
-                    borderRadius: 8,
-                    maxBarThickness: 32
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        color: labelColor,
+    if (!hasReportData) {
+        if (reportsChartWrapper) reportsChartWrapper.style.display = 'none';
+        if (noReportsData) noReportsData.classList.remove('hidden');
+        if (reportsChartInstance) { reportsChartInstance.destroy(); reportsChartInstance = null; }
+    } else {
+        if (reportsChartWrapper) reportsChartWrapper.style.display = 'block';
+        if (noReportsData) noReportsData.classList.add('hidden');
+
+        if (reportsChartInstance) reportsChartInstance.destroy();
+
+        reportsChartInstance = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [
+                    {
+                        label: 'Actual Spending (₹)',
+                        data: totals,
+                        backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        maxBarThickness: 32
+                    },
+                    {
+                        label: 'Budget Limit (₹)',
+                        data: budgetLimits,
+                        backgroundColor: 'rgba(244, 63, 94, 0.25)',
+                        borderColor: 'rgba(244, 63, 94, 0.8)',
+                        borderWidth: 1.5,
+                        borderRadius: 8,
+                        maxBarThickness: 32
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: labelColor,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 16,
+                            font: { family: 'Outfit', size: 12, weight: '500' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(24, 26, 41, 0.95)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#cbd5e1',
+                        borderColor: 'rgba(255, 255, 255, 0.15)',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
                         usePointStyle: true,
-                        pointStyle: 'circle',
-                        padding: 16,
-                        font: { family: 'Outfit', size: 12, weight: '500' }
+                        callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` }
                     }
                 },
-                tooltip: {
-                    backgroundColor: '#1e2030',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#cbd5e1',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
-                    padding: 12,
-                    boxPadding: 6,
-                    usePointStyle: true,
-                    callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` }
+                scales: {
+                    x: { ticks: { color: labelColor, font: { family: 'Outfit', size: 12 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+                    y: { ticks: { color: labelColor, font: { family: 'Outfit', size: 12 } }, grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true }
                 }
-            },
-            scales: {
-                x: { ticks: { color: labelColor, font: { family: 'Outfit', size: 12 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
-                y: { ticks: { color: labelColor, font: { family: 'Outfit', size: 12 } }, grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true }
             }
-        }
-    });
+        });
+    }
 }
 
 function setupEventListeners() {
@@ -660,10 +730,20 @@ function setupEventListeners() {
         btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
     });
 
-    document.querySelectorAll('.btn-add-transaction').forEach(btn => {
-        btn.addEventListener('click', () => openTxModal());
+    document.addEventListener('click', e => {
+        if (e.target.closest('.btn-add-transaction')) {
+            openTxModal();
+        }
+        if (e.target.closest('#btn-empty-reset')) {
+            elements.searchInput.value = '';
+            elements.filterType.value = '';
+            elements.filterCategory.value = '';
+            elements.filterStartDate.value = '';
+            elements.filterEndDate.value = '';
+            loadTransactionsTable();
+            showToast("Filters reset");
+        }
     });
-
 
     elements.btnCloseTxModal.addEventListener('click', closeTxModal);
     elements.btnCancelTxModal.addEventListener('click', closeTxModal);
