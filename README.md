@@ -1,21 +1,21 @@
 # Smart Expense Tracker
 
-Desktop app to track personal expenses. Built with Python + PyWebView, SQLite, and Chart.js.
+A simple desktop expense tracker built with Python, SQLite, and HTML/CSS/JS.
 
-## How to Run (1-Click Options)
+## How to Run
 
-Requires Python 3.7+ and Windows 10/11.
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-- **Silent 1-Click Launch (Recommended)**
-  Double-click `SmartExpenseTracker.vbs` — runs the application seamlessly without opening a command prompt console window.
+2. Start the app:
+   - Double-click `SmartExpenseTracker.vbs` (runs silently in background)
+   - Or run `python backend/app.py` in your terminal
 
-- **Standard Command Prompt Launch**
-  Double-click `run.bat` — sets up the environment and launches the app with console status logs visible.
-
-## Usage
-
-- **Dashboard** – monthly balance, income, and spending by category
-- **Transactions** – add/edit/delete entries, filter by date, category, or search
-- **Budgets** – set monthly limits per category; progress bar goes yellow → red as you get close
-- **Import/Export** – CSV support via native file dialog
-- **Reports** – category comparison, spending analysis, and database reset operations
+## Features
+- Track daily income and expenses
+- Set monthly category budgets with compliance status
+- Visual charts and spending breakdown
+- CSV import & export
+- 100% offline (data stored locally in SQLite)
