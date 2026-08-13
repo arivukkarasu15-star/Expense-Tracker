@@ -2,11 +2,15 @@
 
 Desktop app to track personal expenses. Built with Python + PyWebView, SQLite, and Chart.js.
 
-## Setup
+## How to Run (1-Click Options)
 
 Requires Python 3.7+ and Windows 10/11.
 
-Double-click `run.bat` — it sets up a venv, installs dependencies, and launches the app. Future runs skip straight to launch.
+- **Silent 1-Click Launch (Recommended)**
+  Double-click `SmartExpenseTracker.vbs` — runs the application seamlessly without opening a command prompt console window.
+
+- **Standard Command Prompt Launch**
+  Double-click `run.bat` — sets up the environment and launches the app with console status logs visible.
 
 ## Usage
 
@@ -14,4 +18,4 @@ Double-click `run.bat` — it sets up a venv, installs dependencies, and launche
 - **Transactions** – add/edit/delete entries, filter by date, category, or search
 - **Budgets** – set monthly limits per category; progress bar goes yellow → red as you get close
 - **Import/Export** – CSV support via native file dialog
-- **Settings** – clear the database, toggle dark/light theme
+- **Reports** – category comparison, spending analysis, and database reset operations

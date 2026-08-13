@@ -10,9 +10,6 @@ const allCategories = [...new Set([...expenseCategories, ...incomeCategories])];
 const elements = {
     navItems: document.querySelectorAll('.nav-item'),
     tabContents: document.querySelectorAll('.tab-content'),
-    themeToggle: document.getElementById('theme-toggle'),
-    themeToggleIcon: document.querySelector('#theme-toggle i'),
-    themeToggleText: document.querySelector('#theme-toggle span'),
 
     totalBalance: document.getElementById('total-balance'),
     totalIncome: document.getElementById('total-income'),
@@ -51,6 +48,13 @@ const elements = {
     btnCloseTxModal: document.getElementById('btn-close-tx-modal'),
     btnCancelTxModal: document.getElementById('btn-cancel-tx-modal'),
 
+    btnOpenBudgetModal: document.getElementById('btn-open-budget-modal'),
+    budgetModal: document.getElementById('budget-modal'),
+    budgetForm: document.getElementById('budget-form'),
+    budgetCategorySelect: document.getElementById('budget-category'),
+    budgetAmountInput: document.getElementById('budget-amount'),
+    btnCloseBudgetModal: document.getElementById('btn-close-budget-modal'),
+    btnCancelBudgetModal: document.getElementById('btn-cancel-budget-modal')
 };
 
 function showToast(message, type = 'success') {
@@ -91,35 +95,7 @@ function showConfirm(message, onConfirm) {
 }
 
 
-function initTheme() {
-    const saved = localStorage.getItem('theme') || 'dark';
-    if (saved === 'light') {
-        document.body.classList.replace('dark-theme', 'light-theme');
-        elements.themeToggleIcon.className = 'fa-solid fa-sun';
-        elements.themeToggleText.textContent = 'Light Mode';
-    } else {
-        document.body.classList.replace('light-theme', 'dark-theme');
-        elements.themeToggleIcon.className = 'fa-solid fa-moon';
-        elements.themeToggleText.textContent = 'Dark Mode';
-    }
-}
 
-function toggleTheme() {
-    if (document.body.classList.contains('dark-theme')) {
-        document.body.classList.replace('dark-theme', 'light-theme');
-        elements.themeToggleIcon.className = 'fa-solid fa-sun';
-        elements.themeToggleText.textContent = 'Light Mode';
-        localStorage.setItem('theme', 'light');
-        showToast('Switched to Light Mode');
-    } else {
-        document.body.classList.replace('light-theme', 'dark-theme');
-        elements.themeToggleIcon.className = 'fa-solid fa-moon';
-        elements.themeToggleText.textContent = 'Dark Mode';
-        localStorage.setItem('theme', 'dark');
-        showToast('Switched to Dark Mode');
-    }
-    if (currentTab === 'dashboard' || currentTab === 'reports') refreshData();
-}
 
 function switchTab(tabId) {
     currentTab = tabId;
@@ -379,11 +355,15 @@ async function renderDashboard(data) {
     const canvas = document.getElementById('categoryChart');
     const placeholder = document.getElementById('no-chart-data');
 
+    const centerTotalElem = document.getElementById('center-total-value');
+    if (centerTotalElem) {
+        centerTotalElem.textContent = formatCurrency(data.total_expense);
+    }
+
     if (hasData) {
         canvas.style.display = 'block';
         placeholder.classList.add('hidden');
-        const isLight = document.body.classList.contains('light-theme');
-        const labelColor = isLight ? '#475569' : '#94a3b8';
+        const labelColor = '#94a3b8';
 
         if (categoryChartInstance) categoryChartInstance.destroy();
 
@@ -393,9 +373,21 @@ async function renderDashboard(data) {
                 labels: categories,
                 datasets: [{
                     data: totals,
-                    backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6', '#8b5cf6', '#64748b'],
-                    borderWidth: isLight ? 2 : 0,
-                    borderColor: isLight ? '#ffffff' : 'transparent'
+                    backgroundColor: [
+                        '#6366f1',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ec4899',
+                        '#3b82f6',
+                        '#8b5cf6',
+                        '#06b6d4',
+                        '#f97316'
+                    ],
+                    borderWidth: 4,
+                    borderColor: '#181a29',
+                    hoverBorderColor: '#181a29',
+                    hoverOffset: 10,
+                    borderRadius: 6
                 }]
             },
             options: {
@@ -404,13 +396,28 @@ async function renderDashboard(data) {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { color: labelColor, font: { family: 'Outfit', size: 11 } }
+                        labels: {
+                            color: labelColor,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            boxWidth: 10,
+                            padding: 20,
+                            font: { family: 'Outfit', size: 14, weight: '600' }
+                        }
                     },
                     tooltip: {
+                        backgroundColor: '#1e2030',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#cbd5e1',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true,
                         callbacks: { label: ctx => ` ${ctx.label}: ${formatCurrency(ctx.raw)}` }
                     }
                 },
-                cutout: '65%'
+                cutout: '70%'
             }
         });
     } else {
@@ -529,8 +536,7 @@ function renderBudgets(data) {
 }
 
 function renderReports(data) {
-    const isLight = document.body.classList.contains('light-theme');
-    const labelColor = isLight ? '#475569' : '#94a3b8';
+    const labelColor = '#94a3b8';
 
     elements.avgExpenseValue.textContent = formatCurrency(data.total_expense);
 
@@ -565,7 +571,17 @@ function renderReports(data) {
         }
         const row = document.createElement('div');
         row.className = 'compliance-category-row';
-        row.innerHTML = `<span>${cat}</span><span class="compliance-tag ${tagClass}">${tag}</span>`;
+        row.innerHTML = `
+            <div class="compliance-cat-info">
+                <span class="compliance-cat-name">${cat}</span>
+                <span class="compliance-cat-details">${limit > 0 ? formatCurrency(spent) + ' / ' + formatCurrency(limit) : 'No limit set'}</span>
+            </div>
+            <div class="compliance-cat-actions">
+                <span class="compliance-tag ${tagClass}">${tag}</span>
+                <button class="btn-icon-edit" onclick="openBudgetModal('${cat}', ${limit > 0 ? limit : ''})" title="Set Budget">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+            </div>`;
         complianceDiv.appendChild(row);
     });
 
@@ -588,18 +604,20 @@ function renderReports(data) {
                 {
                     label: 'Actual Spending (₹)',
                     data: totals,
-                    backgroundColor: 'rgba(99, 102, 241, 0.75)',
-                    borderColor: 'var(--color-primary)',
+                    backgroundColor: 'rgba(99, 102, 241, 0.85)',
+                    borderColor: '#6366f1',
                     borderWidth: 1,
-                    borderRadius: 4
+                    borderRadius: 8,
+                    maxBarThickness: 32
                 },
                 {
                     label: 'Budget Limit (₹)',
                     data: budgetLimits,
-                    backgroundColor: 'rgba(244, 63, 94, 0.2)',
-                    borderColor: 'rgba(244, 63, 94, 0.7)',
+                    backgroundColor: 'rgba(244, 63, 94, 0.25)',
+                    borderColor: 'rgba(244, 63, 94, 0.8)',
                     borderWidth: 1.5,
-                    borderRadius: 4
+                    borderRadius: 8,
+                    maxBarThickness: 32
                 }
             ]
         },
@@ -607,11 +625,31 @@ function renderReports(data) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: 'top', labels: { color: labelColor, font: { family: 'Outfit', size: 11 } } }
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: labelColor,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        padding: 16,
+                        font: { family: 'Outfit', size: 12, weight: '500' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#1e2030',
+                    titleColor: '#f8fafc',
+                    bodyColor: '#cbd5e1',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 1,
+                    padding: 12,
+                    boxPadding: 6,
+                    usePointStyle: true,
+                    callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatCurrency(ctx.raw)}` }
+                }
             },
             scales: {
-                x: { ticks: { color: labelColor, font: { family: 'Outfit' } }, grid: { color: 'rgba(255,255,255,0.03)' } },
-                y: { ticks: { color: labelColor, font: { family: 'Outfit' } }, grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true }
+                x: { ticks: { color: labelColor, font: { family: 'Outfit', size: 12 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+                y: { ticks: { color: labelColor, font: { family: 'Outfit', size: 12 } }, grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true }
             }
         }
     });
@@ -622,8 +660,6 @@ function setupEventListeners() {
         btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
     });
 
-    elements.themeToggle.addEventListener('click', toggleTheme);
-
     document.querySelectorAll('.btn-add-transaction').forEach(btn => {
         btn.addEventListener('click', () => openTxModal());
     });
@@ -631,6 +667,11 @@ function setupEventListeners() {
 
     elements.btnCloseTxModal.addEventListener('click', closeTxModal);
     elements.btnCancelTxModal.addEventListener('click', closeTxModal);
+
+    if (elements.btnOpenBudgetModal) elements.btnOpenBudgetModal.addEventListener('click', () => openBudgetModal());
+    if (elements.btnCloseBudgetModal) elements.btnCloseBudgetModal.addEventListener('click', closeBudgetModal);
+    if (elements.btnCancelBudgetModal) elements.btnCancelBudgetModal.addEventListener('click', closeBudgetModal);
+    if (elements.budgetForm) elements.budgetForm.addEventListener('submit', saveBudget);
 
     elements.txForm.addEventListener('submit', saveTransaction);
 
@@ -700,5 +741,3 @@ window.addEventListener('pywebviewready', () => {
     setupEventListeners();
     initCategorySelectors();
 });
-
-initTheme();
