@@ -510,12 +510,12 @@ async function loadTransactionsTable() {
                     const amountClass = tx.type === 'income' ? 'income' : 'expense';
                     const badgeClass = tx.type === 'income' ? 'badge-income' : 'badge-expense';
                     tr.innerHTML = `
-                        <td>${formatDateString(tx.date)}</td>
-                        <td>${tx.category}</td>
-                        <td><span class="badge ${badgeClass}">${tx.type}</span></td>
-                        <td>${escapeHTML(tx.notes) || '<span class="text-muted">None</span>'}</td>
-                        <td class="text-right td-amount ${amountClass}">${prefix}${formatCurrency(tx.amount)}</td>
-                        <td class="text-center">
+                        <td data-label="Date">${formatDateString(tx.date)}</td>
+                        <td data-label="Category">${escapeHTML(tx.category)}</td>
+                        <td data-label="Type"><span class="badge ${badgeClass}">${tx.type}</span></td>
+                        <td data-label="Notes">${escapeHTML(tx.notes) || '<span class="text-muted">None</span>'}</td>
+                        <td data-label="Amount" class="text-right td-amount ${amountClass}">${prefix}${formatCurrency(tx.amount)}</td>
+                        <td data-label="Actions" class="text-center">
                             <div class="table-actions">
                                 <button class="btn-icon-edit" onclick="editTxInline(${tx.id})" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
