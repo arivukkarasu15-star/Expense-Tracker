@@ -130,6 +130,15 @@ button {
     transition: all var(--transition-fast);
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(129, 140, 248, 0.9);
+    outline-offset: 3px;
+}
+
 a {
     text-decoration: none;
     color: inherit;
@@ -1543,6 +1552,11 @@ tr:hover td {
         margin-bottom: 18px;
     }
 
+    #transactions .content-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .content-header h1 {
         font-size: clamp(1.5rem, 6vw, 1.85rem);
         line-height: 1.15;
@@ -1563,9 +1577,36 @@ tr:hover td {
     }
 
     .header-actions {
-        flex-wrap: wrap;
-        justify-content: flex-end;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
         gap: 8px;
+    }
+
+    #transactions .header-actions .btn-add-transaction {
+        grid-column: 1 / -1;
+    }
+
+    .btn-sm,
+    .btn-text,
+    .filter-actions-row .btn {
+        min-height: 44px;
+    }
+
+    .btn-icon-edit,
+    .btn-icon-delete,
+    .btn-close-modal {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .type-btn {
+        min-height: 48px;
+    }
+
+    .btn,
+    button {
+        touch-action: manipulation;
     }
 
     .summary-cards {
@@ -1890,7 +1931,8 @@ tr:hover td {
     }
 
     .content-header > .btn {
-        align-self: flex-start;
+        align-self: stretch;
+        min-height: 48px;
     }
 
     .header-actions {
